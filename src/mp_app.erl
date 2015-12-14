@@ -31,7 +31,7 @@ start(_StartType, _StartArgs) ->
     Port =
     case os:getenv("PORT") of
         false ->
-            7070;
+            9090;
         P ->
             list_to_integer(P)
     end,
