@@ -47,7 +47,7 @@ start_child() ->
 %%--------------------------------------------------------------------
 init([LSock]) ->
     RestartStrategy = simple_one_for_one,
-    MaxRestarts = 0,
+    MaxRestarts = 10000,
     MaxSecondsBetweenRestarts = 1,
 
     SupFlags = {RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
