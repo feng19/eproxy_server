@@ -17,8 +17,8 @@
 
 -include("socks_type.hrl").
 
+-define(debug(Msg),io:format("[~p:~p] ~p~n",[?MODULE,?LINE,Msg])).
 -define(TIMEOUT, 1000 * 60 * 10).
-
 
 %%%===================================================================
 %%% API
@@ -99,7 +99,7 @@ handle_cast(_Msg, State) ->
 
 handle_info(timeout, #state{lsock = LSock, socket = undefined} = State) ->
     {ok, Socket} = gen_tcp:accept(LSock),
-io:format("Socket:~p~n",[Socket]),
+    ?debug(Socket),
     mp_sup:start_child(),
     {noreply, State#state{socket=Socket}, ?TIMEOUT};
 
@@ -111,41 +111,42 @@ handle_info(timeout, #state{socket = Socket} = State) when is_port(Socket) ->
 
 %% first message from client
 handle_info({tcp, Socket, Request}, #state{key = Key, socket = Socket, remote = undefined} = State) ->
-io:format("Socket:~p,Request:~p~n",[Socket,Request]),
+    ?debug({Socket,Request}),
     case connect_to_remote(Request, Key) of
         {ok, Remote} ->
             ok = inet:setopts(Socket, [{active, once}]),
             ok = inet:setopts(Remote, [{active, once}]),
             {noreply, State#state{remote=Remote}, ?TIMEOUT};
         {error, Error} ->
-io:format("Error:~p~n",[Error]),
+            ?debug(Error),
             {stop, Error, State}
     end;
 
 
 %% recv from client, and send to server
 handle_info({tcp, Socket, Request}, #state{key=Key, socket=Socket, remote=Remote} = State) ->
-io:format("Request:~p~n",[Request]),
+    ?debug(Request),
     {ok, RealData} = mp_crypto:decrypt(Key, Request),
-io:format("RealData:~p~n",[RealData]),
+    ?debug(RealData),
     case gen_tcp:send(Remote, RealData) of
         ok ->
             ok = inet:setopts(Socket, [{active, once}]),
             {noreply, State, ?TIMEOUT};
         {error, Error} ->
-io:format("Error:~p~n",[Error]),
+            ?debug(Error),
             {stop, Error, State}
     end;
 
 
 %% recv from server, and send back to client
 handle_info({tcp, Socket, Response}, #state{key=Key, socket=Client, remote=Socket} = State) ->
-io:format("Response:~p~n",[Response]),
+    ?debug(Response),
     case gen_tcp:send(Client, mp_crypto:encrypt(Key, Response)) of
         ok ->
             ok = inet:setopts(Socket, [{active, once}]),
             {noreply, State, ?TIMEOUT};
         {error, Error} ->
+            ?debug(Error),
             {stop, Error, State}
     end;
 
