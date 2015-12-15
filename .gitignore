@@ -1,0 +1,6 @@
+.project
+/.rebar
+/.settings
+/deps
+/ebin
+*~
