@@ -2,5 +2,5 @@
 -export([start/0]).
 
 start() ->
-    application:start(make_proxy_server).
+    application:ensure_all_started(make_proxy_server).
 

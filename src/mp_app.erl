@@ -27,7 +27,12 @@
 %% @end
 %%--------------------------------------------------------------------
 start(_StartType, _StartArgs) ->
-    %{ok, Port} = application:get_env(make_proxy_server, port),
+	Dispatch = cowboy_router:compile([
+		{'_', [
+			{"/", mp_toppage_handler, []},
+            {"/ws", mp_ws_handler, []}
+		]}
+	]),
     Port =
     case os:getenv("PORT") of
         false ->
@@ -35,20 +40,10 @@ start(_StartType, _StartArgs) ->
         P ->
             list_to_integer(P)
     end,
-    {ok, LSock} = gen_tcp:listen(Port, [binary,
-        {ip, {0, 0, 0, 0}},
-        {reuseaddr, true},
-        {active, once},
-        {packet, 4},
-        {backlog, 256}]),
-
-    case mp_sup:start_link(LSock) of
-        {ok, Pid} ->
-            mp_sup:start_child(),
-            {ok, Pid};
-        Other ->
-            {error, Other}
-    end.
+    %todo wss
+    cowboy:start_http(http, 100, [{port, Port}], [
+            {env, [{dispatch, Dispatch}]}
+    ]).
 
 %%--------------------------------------------------------------------
 %% @private
