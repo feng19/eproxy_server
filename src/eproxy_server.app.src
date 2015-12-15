@@ -1,0 +1,13 @@
+{
+    application,
+    eproxy_server,
+    [
+        {description, "eproxy_server"},
+        {vsn, "0.1.0"},
+        {registered, [
+            mp_sup
+        ]},
+        {applications, [kernel, stdlib, cowboy]},
+        {mod, {eps_app, []}}
+    ]
+}.

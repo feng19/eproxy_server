@@ -1,3 +1,3 @@
 
--define(DEBUG(Msg),make_proxy_server:debug(Msg)).
--define(DEBUG(Format,Args),make_proxy_server:debug(Format,Args)).
+-define(DEBUG(Msg),eproxy_server:debug(Msg)).
+-define(DEBUG(Format,Args),eproxy_server:debug(Format,Args)).
