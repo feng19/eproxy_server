@@ -61,9 +61,9 @@ handle_info({tcp, Socket, Request}, #state{key = Key, socket = Socket, remote = 
 
 %% recv from client, and send to server
 handle_info({tcp, Socket, Request}, #state{key=Key, socket=Socket, remote=Remote} = State) ->
-    ?DEBUG(Request),
+%%     ?DEBUG(Request),
     {ok, RealData} = eps_crypto:decrypt(Key, Request),
-    ?DEBUG(RealData),
+%%     ?DEBUG(RealData),
     case gen_tcp:send(Remote, RealData) of
         ok ->
             ok = inet:setopts(Socket, [{active, once}]),
@@ -75,7 +75,7 @@ handle_info({tcp, Socket, Request}, #state{key=Key, socket=Socket, remote=Remote
 
 %% recv from server, and send back to client
 handle_info({tcp, Socket, Response}, #state{key=Key, socket=Client, remote=Socket} = State) ->
-    ?DEBUG(Response),
+%%     ?DEBUG(Response),
     case gen_tcp:send(Client, eps_crypto:encrypt(Key, Response)) of
         ok ->
             ok = inet:setopts(Socket, [{active, once}]),

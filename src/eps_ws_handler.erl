@@ -13,24 +13,24 @@
 -include("socks_type.hrl").
 -include("debug.hrl").
 
--define(TIMEOUT, 1000 * 60 * 10).
+-define(TIMEOUT, 1000 * 20).
 
 -record(state, {key, remote}).
 
 %%===================================================================
 
 init({tcp, http}, _Req, _Opts) ->
-    ?DEBUG("ws init"),
+%%     ?DEBUG("ws init"),
 	{upgrade, protocol, cowboy_websocket}.
 
 websocket_init(_TransportName, Req, _Opts) ->
-    ?DEBUG("ws init 2"),
+%%     ?DEBUG("ws init 2"),
     {ok, Key} = application:get_env(eproxy_server, key),
 	{ok, Req, #state{key=Key}, ?TIMEOUT}.
 
 %% first message from client
 websocket_handle({binary, Msg}, Req, #state{key = Key, remote = undefined} = State) ->
-    ?DEBUG(Msg),
+%%     ?DEBUG(Msg),
     case connect_to_remote(Msg, Key) of
         {ok, Remote} ->
             ok = inet:setopts(Remote, [{active, once}]),
@@ -43,9 +43,9 @@ websocket_handle({binary, Msg}, Req, #state{key = Key, remote = undefined} = Sta
 
 %% recv from client, and send to server
 websocket_handle({binary, Msg}, Req, #state{key=Key, remote=Remote} = State) ->
-    ?DEBUG(Msg),
+%%     ?DEBUG(Msg),
     {ok, RealData} = eps_crypto:decrypt(Key, Msg),
-    ?DEBUG(RealData),
+%%     ?DEBUG(RealData),
     case gen_tcp:send(Remote, RealData) of
         ok ->
             {ok, Req, State};
@@ -65,7 +65,7 @@ websocket_info(timeout, Req, State) ->
 
 %% recv from server, and send back to client
 websocket_info({tcp, Socket, Response}, Req, #state{key=Key, remote=Socket} = State) ->
-    ?DEBUG(Response),
+%%     ?DEBUG(Response),
     Msg = eps_crypto:encrypt(Key, Response),
     ok = inet:setopts(Socket, [{active, once}]),
     {reply, {binary,Msg}, Req, State};
