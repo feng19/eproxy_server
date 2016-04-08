@@ -1,6 +1,6 @@
-.project
 /.rebar
-/.settings
 /deps
 /ebin
 *~
+.idea
+*.iml
